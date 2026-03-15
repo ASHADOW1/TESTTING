@@ -136,19 +136,13 @@ const csvUrl = 'https://docs.google.com/spreadsheets/d/13WUAN1zNK3fH_wX32QLb44En
 fetch(csvUrl)
 .then(response => response.text())
 .then(csvText => {
-    console.log('Raw CSV first 200 chars:', csvText.substring(0, 200));
-    
-    // Parse CSV manually
+    // Parse CSV
     const lines = csvText.split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
-    console.log('Headers:', headers);
-    
     const data = [];
     
     for(let i = 1; i < lines.length; i++) {
         if(!lines[i].trim()) continue;
-        
-        // Simple split for now
         const values = lines[i].split(',').map(v => v.trim());
         const row = {};
         headers.forEach((h, idx) => {
@@ -158,59 +152,36 @@ fetch(csvUrl)
     }
     
     console.log('CSV Data loaded:', data.length, 'rows');
-    console.log('First row:', data[0]);
     
+    // Process communities
     const communities = {};
 
-    data.forEach((row, index) => {
+    data.forEach(row => {
         const parish = row.Parish?.trim();
         const community = row.Community?.trim();
         const rawPriority = row.Severity?.trim() || '';
         const rawNeeds = row.Needs?.trim() || '';
         
-        console.log(`Row ${index}:`, {parish, community, rawPriority, rawNeeds});
+        // Map priority
+        let priority = 'low';
+        const priorityLower = rawPriority.toLowerCase();
         
-        // ===== AGGRESSIVE PRIORITY MAPPING =====
-        let priority = 'low'; // Default
-        
-        if (rawPriority) {
-            const priorityLower = rawPriority.toLowerCase();
-            
-            if (priorityLower.includes('urgent') || 
-                priorityLower.includes('critical') || 
-                priorityLower.includes('high') ||
-                priorityLower === 'urgent') {
-                priority = 'high';
-            }
-            else if (priorityLower.includes('moderate') || 
-                     priorityLower.includes('medium') ||
-                     priorityLower === 'moderate' ||
-                     priorityLower === 'medium') {
-                priority = 'medium';
-            }
-            else if (priorityLower.includes('none') || 
-                     priorityLower.includes('low') ||
-                     priorityLower.includes('medical') ||
-                     priorityLower === 'none' ||
-                     priorityLower === 'low') {
-                priority = 'low';
-            }
+        if (priorityLower.includes('urgent') || priorityLower.includes('critical')) {
+            priority = 'high';
+        }
+        else if (priorityLower.includes('moderate') || priorityLower.includes('medium')) {
+            priority = 'medium';
         }
         
-        // ===== SIMPLE NEEDS PARSING =====
+        // Parse needs
         let needs = [];
         if (rawNeeds) {
-            // Remove brackets and quotes
             let cleanNeeds = rawNeeds
                 .replace(/\[/g, '')
                 .replace(/\]/g, '')
-                .replace(/"/g, '')
-                .replace(/'/g, '');
-            
+                .replace(/"/g, '');
             needs = cleanNeeds.split(',').map(n => n.trim()).filter(n => n.length > 0);
         }
-        
-        console.log(`Mapped: ${community} -> ${priority}, needs:`, needs);
         
         if(!parish || !community) return;
 
@@ -238,71 +209,53 @@ fetch(csvUrl)
     });
 
     const commArray = Object.values(communities);
-    console.log('Final communities:', commArray);
+    console.log('Communities:', commArray);
 
-    const grouped = {high:[], medium:[], low:[]};
-
-    commArray.forEach(item => {
-        if(grouped[item.priority]) {
-            grouped[item.priority].push(item);
-        }
-    });
-
-    console.log('Grouped counts:', {
-        high: grouped.high.length,
-        medium: grouped.medium.length,
-        low: grouped.low.length
-    });
-
-    // Group by parish within each priority
-    const groupedByParish = {
+    // Group by priority AND parish
+    const grouped = {
         high: {},
         medium: {},
         low: {}
     };
-    
+
     commArray.forEach(item => {
-        if(!groupedByParish[item.priority]) return;
-        if(!groupedByParish[item.priority][item.parish]) {
-            groupedByParish[item.priority][item.parish] = [];
+        if (!grouped[item.priority]) return;
+        if (!grouped[item.priority][item.parish]) {
+            grouped[item.priority][item.parish] = [];
         }
-        groupedByParish[item.priority][item.parish].push(item);
+        grouped[item.priority][item.parish].push(item);
     });
 
-    // Clear and update grids
+    console.log('Grouped by parish:', grouped);
+
+    // Clear all grids
     document.querySelectorAll('.parish-grid').forEach(g => g.innerHTML = '');
 
-    // Update High Priority
+    // Update High Priority grid
     const highGrid = document.querySelector('.priority.high .parish-grid');
-    if (highGrid && Object.keys(groupedByParish.high).length > 0) {
-        Object.keys(groupedByParish.high).sort().forEach(parish => {
-            highGrid.appendChild(createParishCard(parish, groupedByParish.high[parish]));
+    if (highGrid && Object.keys(grouped.high).length > 0) {
+        Object.keys(grouped.high).sort().forEach(parish => {
+            highGrid.appendChild(createParishCard(parish, grouped.high[parish]));
         });
-    } else {
-        highGrid.innerHTML = '<div class="parish-card"><h3>No Data</h3><p>No high priority communities</p></div>';
     }
 
-    // Update Medium Priority
+    // Update Medium Priority grid
     const mediumGrid = document.querySelector('.priority.medium .parish-grid');
-    if (mediumGrid && Object.keys(groupedByParish.medium).length > 0) {
-        Object.keys(groupedByParish.medium).sort().forEach(parish => {
-            mediumGrid.appendChild(createParishCard(parish, groupedByParish.medium[parish]));
+    if (mediumGrid && Object.keys(grouped.medium).length > 0) {
+        Object.keys(grouped.medium).sort().forEach(parish => {
+            mediumGrid.appendChild(createParishCard(parish, grouped.medium[parish]));
         });
-    } else {
-        mediumGrid.innerHTML = '<div class="parish-card"><h3>No Data</h3><p>No medium priority communities</p></div>';
     }
 
-    // Update Low Priority
+    // Update Low Priority grid
     const lowGrid = document.querySelector('.priority.low .parish-grid');
-    if (lowGrid && Object.keys(groupedByParish.low).length > 0) {
-        Object.keys(groupedByParish.low).sort().forEach(parish => {
-            lowGrid.appendChild(createParishCard(parish, groupedByParish.low[parish]));
+    if (lowGrid && Object.keys(grouped.low).length > 0) {
+        Object.keys(grouped.low).sort().forEach(parish => {
+            lowGrid.appendChild(createParishCard(parish, grouped.low[parish]));
         });
-    } else {
-        lowGrid.innerHTML = '<div class="parish-card"><h3>No Data</h3><p>No low priority communities</p></div>';
     }
 
-    // Add markers with default coordinates
+    // Add map markers
     const colors = {high:'red', medium:'orange', low:'blue'};
     const icons = {
         high:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -310,7 +263,6 @@ fetch(csvUrl)
         low:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png'
     };
 
-    // Default coordinates for known communities
     const coordsMap = {
         'Angels': [18.0167, -76.9167],
         'August Town': [18.0, -76.75],
@@ -332,12 +284,7 @@ fetch(csvUrl)
         }], colors[c.priority], c.priority.charAt(0).toUpperCase() + c.priority.slice(1) + ' Priority', icons[c.priority]);
     });
 })
-.catch(err => {
-    console.error('Error loading CSV:', err);
-    document.querySelectorAll('.parish-grid').forEach(g => {
-        g.innerHTML = '<div class="parish-card"><h3>Error</h3><p>Failed to load data: ' + err.message + '</p></div>';
-    });
-});
+.catch(err => console.error('Error loading CSV:', err));
 </script>
 </body>
 </html>
