@@ -135,13 +135,33 @@ function createParishCard(parishName, communities) {
 fetch('https://ashadow1.github.io/TESTTING/disaster-data.json')
 .then(res=>res.json())
 .then(data=>{
+    console.log('Raw data:', data[0]);
+    
     const communities = {};
 
     data.forEach(row=>{
         const parish = row.Parish?.trim();
         const community = row.Community?.trim();
         const priority = row.Severity?.trim().toLowerCase();
-        const needs = row.Needs?.trim().toLowerCase();
+        
+        // Handle the weird Needs format with brackets and quotes
+        let needs = [];
+        const rawNeeds = row.Needs?.trim() || '';
+        
+        if (rawNeeds.includes('[')) {
+            // Extract content between brackets
+            const needsMatch = rawNeeds.match(/\[(.*?)\]/);
+            if (needsMatch) {
+                needs = needsMatch[1]
+                    .replace(/["""]/g, '')
+                    .split(',')
+                    .map(n => n.trim())
+                    .filter(n => n.length > 0);
+            }
+        } else {
+            needs = rawNeeds.split(',').map(n => n.trim());
+        }
+        
         if(!parish || !community || !priority) return;
 
         const key = `${parish}|${community}`;
@@ -150,7 +170,7 @@ fetch('https://ashadow1.github.io/TESTTING/disaster-data.json')
                 parish,
                 community,
                 priority,
-                needs: needs ? needs.split(',').map(n=>n.trim()) : [],
+                needs: needs,
                 count:1,
                 Latitude: row.Latitude,
                 Longitude: row.Longitude
@@ -159,17 +179,19 @@ fetch('https://ashadow1.github.io/TESTTING/disaster-data.json')
             const prioRank = {high:3, medium:2, low:1};
             if(prioRank[priority] > prioRank[communities[key].priority]) 
                 communities[key].priority = priority;
-            if(needs){
-                needs.split(',').forEach(n=>{
-                    if(!communities[key].needs.includes(n))
-                        communities[key].needs.push(n);
-                });
-            }
+            
+            needs.forEach(n=>{
+                if(!communities[key].needs.includes(n) && n)
+                    communities[key].needs.push(n);
+            });
+            
             communities[key].count++;
         }
     });
 
     const commArray = Object.values(communities);
+    console.log('Processed communities:', commArray);
+    
     const grouped = {high:{}, medium:{}, low:{}};
 
     commArray.forEach(item=>{
@@ -178,6 +200,8 @@ fetch('https://ashadow1.github.io/TESTTING/disaster-data.json')
             grouped[item.priority][item.parish] = [];
         grouped[item.priority][item.parish].push(item);
     });
+
+    console.log('Grouped data:', grouped);
 
     // Clear and update grids
     document.querySelectorAll('.parish-grid').forEach(g=>g.innerHTML='');
@@ -191,7 +215,7 @@ fetch('https://ashadow1.github.io/TESTTING/disaster-data.json')
         }
     });
 
-    // Add markers
+    // Add markers (if coordinates exist)
     const colors = {high:'red', medium:'orange', low:'blue'};
     const icons = {
         high:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
