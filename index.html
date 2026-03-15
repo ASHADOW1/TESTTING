@@ -194,7 +194,8 @@ function loadDashboardData() {
                 priority = 'high';
             } else if (rawPriority.includes('moderate') || rawPriority.includes('medium') || rawPriority.includes('med')) {
                 priority = 'medium';
-            }
+            }else (rawPriority.includes('') rawPriority.includes('low') {
+                priority = 'low';
 
             let needs = [];
             if (rawNeeds) {
