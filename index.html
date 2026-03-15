@@ -136,89 +136,83 @@ const csvUrl = 'https://docs.google.com/spreadsheets/d/13WUAN1zNK3fH_wX32QLb44En
 fetch(csvUrl)
 .then(response => response.text())
 .then(csvText => {
+    console.log('Raw CSV first 200 chars:', csvText.substring(0, 200));
+    
     // Parse CSV manually
     const lines = csvText.split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
+    console.log('Headers:', headers);
+    
     const data = [];
     
     for(let i = 1; i < lines.length; i++) {
         if(!lines[i].trim()) continue;
         
-        // Handle quoted fields
-        const values = [];
-        let inQuotes = false;
-        let currentValue = '';
-        
-        for(let char of lines[i]) {
-            if(char === '"' && !inQuotes) {
-                inQuotes = true;
-            } else if(char === '"' && inQuotes) {
-                inQuotes = false;
-            } else if(char === ',' && !inQuotes) {
-                values.push(currentValue);
-                currentValue = '';
-            } else {
-                currentValue += char;
-            }
-        }
-        values.push(currentValue);
-        
+        // Simple split for now
+        const values = lines[i].split(',').map(v => v.trim());
         const row = {};
         headers.forEach((h, idx) => {
-            row[h] = values[idx] ? values[idx].trim() : '';
+            row[h] = values[idx] || '';
         });
         data.push(row);
     }
     
     console.log('CSV Data loaded:', data.length, 'rows');
+    console.log('First row:', data[0]);
     
     const communities = {};
 
-    data.forEach(row => {
+    data.forEach((row, index) => {
         const parish = row.Parish?.trim();
         const community = row.Community?.trim();
         const rawPriority = row.Severity?.trim() || '';
         const rawNeeds = row.Needs?.trim() || '';
         
-        // ===== FIXED PRIORITY MAPPING =====
-        let priority = rawPriority.toLowerCase();
+        console.log(`Row ${index}:`, {parish, community, rawPriority, rawNeeds});
         
-        // Map all possible values to high/medium/low
-        if(priority.includes('urgent') || priority.includes('critical') || priority.includes('high')) {
-            priority = 'high';
-        }
-        else if(priority.includes('moderate') || priority.includes('medium')) {
-            priority = 'medium';
-        }
-        else if(priority.includes('none') || priority.includes('low') || priority === '' || priority.includes('medical')) {
-            priority = 'low';
-        }
-        else {
-            priority = 'low'; // Default for any other values
-        }
+        // ===== AGGRESSIVE PRIORITY MAPPING =====
+        let priority = 'low'; // Default
         
-        // ===== FIXED NEEDS PARSING =====
-        let needs = [];
-        
-        // Handle JSON-like arrays with brackets and quotes
-        if(rawNeeds.includes('[')) {
-            // Extract content between brackets
-            const match = rawNeeds.match(/\[(.*?)\]/);
-            if(match) {
-                needs = match[1]
-                    .replace(/["""]/g, '') // Remove quotes
-                    .split(',')
-                    .map(n => n.trim())
-                    .filter(n => n.length > 0);
+        if (rawPriority) {
+            const priorityLower = rawPriority.toLowerCase();
+            
+            if (priorityLower.includes('urgent') || 
+                priorityLower.includes('critical') || 
+                priorityLower.includes('high') ||
+                priorityLower === 'urgent') {
+                priority = 'high';
             }
-        } else {
-            needs = rawNeeds.split(',').map(n => n.trim()).filter(n => n.length > 0);
+            else if (priorityLower.includes('moderate') || 
+                     priorityLower.includes('medium') ||
+                     priorityLower === 'moderate' ||
+                     priorityLower === 'medium') {
+                priority = 'medium';
+            }
+            else if (priorityLower.includes('none') || 
+                     priorityLower.includes('low') ||
+                     priorityLower.includes('medical') ||
+                     priorityLower === 'none' ||
+                     priorityLower === 'low') {
+                priority = 'low';
+            }
         }
         
-        // Clean up needs - sometimes they come as "food" etc with quotes
-        needs = needs.map(n => n.replace(/["""]/g, '').trim());
+        // ===== SIMPLE NEEDS PARSING =====
+        let needs = [];
+        if (rawNeeds) {
+            // Remove brackets and quotes
+            let cleanNeeds = rawNeeds
+                .replace(/\[/g, '')
+                .replace(/\]/g, '')
+                .replace(/"/g, '')
+                .replace(/'/g, '');
+            
+            needs = cleanNeeds.split(',').map(n => n.trim()).filter(n => n.length > 0);
+        }
         
-        if(!parish || !community || !priority) return;
+        console.log(`Mapped: ${community} -> ${priority}, needs:`, needs);
+        
+        if(!parish || !community) return;
 
         const key = `${parish}|${community}`;
         if(!communities[key]) {
@@ -244,34 +238,69 @@ fetch(csvUrl)
     });
 
     const commArray = Object.values(communities);
-    console.log('Processed communities:', commArray);
+    console.log('Final communities:', commArray);
 
-    const grouped = {high:{}, medium:{}, low:{}};
+    const grouped = {high:[], medium:[], low:[]};
 
     commArray.forEach(item => {
-        if(!grouped[item.priority]) return;
-        if(!grouped[item.priority][item.parish]) {
-            grouped[item.priority][item.parish] = [];
+        if(grouped[item.priority]) {
+            grouped[item.priority].push(item);
         }
-        grouped[item.priority][item.parish].push(item);
     });
 
-    console.log('Grouped data:', grouped);
-    console.log('High parishes:', Object.keys(grouped.high));
-    console.log('Medium parishes:', Object.keys(grouped.medium));
-    console.log('Low parishes:', Object.keys(grouped.low));
+    console.log('Grouped counts:', {
+        high: grouped.high.length,
+        medium: grouped.medium.length,
+        low: grouped.low.length
+    });
+
+    // Group by parish within each priority
+    const groupedByParish = {
+        high: {},
+        medium: {},
+        low: {}
+    };
+    
+    commArray.forEach(item => {
+        if(!groupedByParish[item.priority]) return;
+        if(!groupedByParish[item.priority][item.parish]) {
+            groupedByParish[item.priority][item.parish] = [];
+        }
+        groupedByParish[item.priority][item.parish].push(item);
+    });
 
     // Clear and update grids
     document.querySelectorAll('.parish-grid').forEach(g => g.innerHTML = '');
 
-    ['high','medium','low'].forEach(priority => {
-        const grid = document.querySelector(`.priority.${priority} .parish-grid`);
-        if(grid && Object.keys(grouped[priority]).length > 0) {
-            Object.keys(grouped[priority]).sort().forEach(parish => {
-                grid.appendChild(createParishCard(parish, grouped[priority][parish]));
-            });
-        }
-    });
+    // Update High Priority
+    const highGrid = document.querySelector('.priority.high .parish-grid');
+    if (highGrid && Object.keys(groupedByParish.high).length > 0) {
+        Object.keys(groupedByParish.high).sort().forEach(parish => {
+            highGrid.appendChild(createParishCard(parish, groupedByParish.high[parish]));
+        });
+    } else {
+        highGrid.innerHTML = '<div class="parish-card"><h3>No Data</h3><p>No high priority communities</p></div>';
+    }
+
+    // Update Medium Priority
+    const mediumGrid = document.querySelector('.priority.medium .parish-grid');
+    if (mediumGrid && Object.keys(groupedByParish.medium).length > 0) {
+        Object.keys(groupedByParish.medium).sort().forEach(parish => {
+            mediumGrid.appendChild(createParishCard(parish, groupedByParish.medium[parish]));
+        });
+    } else {
+        mediumGrid.innerHTML = '<div class="parish-card"><h3>No Data</h3><p>No medium priority communities</p></div>';
+    }
+
+    // Update Low Priority
+    const lowGrid = document.querySelector('.priority.low .parish-grid');
+    if (lowGrid && Object.keys(groupedByParish.low).length > 0) {
+        Object.keys(groupedByParish.low).sort().forEach(parish => {
+            lowGrid.appendChild(createParishCard(parish, groupedByParish.low[parish]));
+        });
+    } else {
+        lowGrid.innerHTML = '<div class="parish-card"><h3>No Data</h3><p>No low priority communities</p></div>';
+    }
 
     // Add markers with default coordinates
     const colors = {high:'red', medium:'orange', low:'blue'};
@@ -281,7 +310,7 @@ fetch(csvUrl)
         low:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png'
     };
 
-    // EXPANDED coordinates for all communities
+    // Default coordinates for known communities
     const coordsMap = {
         'Angels': [18.0167, -76.9167],
         'August Town': [18.0, -76.75],
@@ -291,30 +320,24 @@ fetch(csvUrl)
         'Labubu Town': [18.3093, -76.8895],
         'Montego Bay': [18.4762, -77.8939],
         'La Bubu Town': [18.3093, -76.8895],
-        'Johnstone': [18.2, -77.1],
-        'Trench Town': [18.4762, -77.8939],
-        'Denham Town': [18.4762, -77.8830],
-        'Half Way Tree': [18.0126, -76.7567],
-        'Papine': [18.0200, -76.7500],
-        'May Pen': [17.9557, -77.2405],
-        'Mandeville': [18.0515, -77.5071],
-        'Port Maria': [18.3093, -76.8895],
-        'Port Antonio': [18.1765, -76.4500]
+        'Johnstone': [18.2, -77.1]
     };
 
-    ['high','medium','low'].forEach(priority => {
-        const comms = commArray.filter(c => c.priority === priority);
-        comms.forEach(c => {
-            const coords = coordsMap[c.community] || [18.1096, -77.2975];
-            addCountMarkerWithIcon([{
-                name: c.community,
-                coords: coords,
-                count: c.count
-            }], colors[priority], priority.charAt(0).toUpperCase() + priority.slice(1) + ' Priority', icons[priority]);
-        });
+    commArray.forEach(c => {
+        const coords = coordsMap[c.community] || [18.1096, -77.2975];
+        addCountMarkerWithIcon([{
+            name: c.community,
+            coords: coords,
+            count: c.count
+        }], colors[c.priority], c.priority.charAt(0).toUpperCase() + c.priority.slice(1) + ' Priority', icons[c.priority]);
     });
 })
-.catch(err => console.error('Error loading CSV:', err));
+.catch(err => {
+    console.error('Error loading CSV:', err);
+    document.querySelectorAll('.parish-grid').forEach(g => {
+        g.innerHTML = '<div class="parish-card"><h3>Error</h3><p>Failed to load data: ' + err.message + '</p></div>';
+    });
+});
 </script>
 </body>
 </html>
