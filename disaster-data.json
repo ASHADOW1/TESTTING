@@ -208,5 +208,47 @@
     "Raw Transcript": "reporting their location as Monroe Road",
     "Latitude": "Kingston. They confirmed they were not trapped or injured but required shelter. The agent recorded this information",
     "Longitude": "notified emergency services for the specified area"
+  },
+  {
+    "Timestamp": "2026-03-15T18:00:40.555Z",
+    "Parish": "",
+    "Community": "Christiana",
+    "Needs": "\"[\"\"food\"\"]\"",
+    "CutOff": "FALSE",
+    "Severity": "medium",
+    "CallID": "conv_8501kksaecage5a9fbzb3vqm7v4e",
+    "Caller": "18769902475",
+    "Summary": "\"The user contacted the Hurricane Melissa emergency response line",
+    "Raw Transcript": "reporting their location as Monroe Road",
+    "Latitude": "Kingston. They confirmed they were not trapped or injured but required shelter. The agent recorded this information",
+    "Longitude": "notified emergency services for the specified area"
+  },
+  {
+    "Timestamp": "2026-03-15T18:00:40.555Z",
+    "Parish": "St. Ann",
+    "Community": "Brown's Town",
+    "Needs": "\"[\"\"water\"\"]\"",
+    "CutOff": "FALSE",
+    "Severity": "low",
+    "CallID": "conv_8501kksaecage5a9fbzb3vqm7v4e",
+    "Caller": "18769902475",
+    "Summary": "\"The user contacted the Hurricane Melissa emergency response line",
+    "Raw Transcript": "reporting their location as Monroe Road",
+    "Latitude": "Kingston. They confirmed they were not trapped or injured but required shelter. The agent recorded this information",
+    "Longitude": "notified emergency services for the specified area"
+  },
+  {
+    "Timestamp": "2026-03-15T18:00:40.555Z",
+    "Parish": "Westmoreland",
+    "Community": "Bethel Cove Town",
+    "Needs": "\"[\"\"food\"\"]\"",
+    "CutOff": "FALSE",
+    "Severity": "medium",
+    "CallID": "conv_8501kksaecage5a9fbzb3vqm7v4e",
+    "Caller": "18769902475",
+    "Summary": "\"The user contacted the Hurricane Melissa emergency response line",
+    "Raw Transcript": "reporting their location as Monroe Road",
+    "Latitude": "Kingston. They confirmed they were not trapped or injured but required shelter. The agent recorded this information",
+    "Longitude": "notified emergency services for the specified area"
   }
 ]
