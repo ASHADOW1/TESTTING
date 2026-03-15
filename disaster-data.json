@@ -72,7 +72,7 @@
   {
     "Timestamp": "2026-03-15T11:38:36.400Z",
     "Parish": "St. Mary",
-    "Community": "Richmond",
+    "Community": "Ramsgate",
     "Needs": "\"[\"\"water\"\"]\"",
     "CutOff": "FALSE",
     "Severity": "high",
@@ -82,6 +82,34 @@
     "Raw Transcript": "Paul",
     "Latitude": "contacted the Hurricane Melissa emergency response line. The agent confirmed Paul's location as Saint Mary",
     "Longitude": "Richmond"
+  },
+  {
+    "Timestamp": "2026-03-15T14:03:52.080Z",
+    "Parish": "St. Catherine",
+    "Community": "Angels",
+    "Needs": "\"[\"\"food\"\"]\"",
+    "CutOff": "FALSE",
+    "Severity": "",
+    "CallID": "conv_7401kkrww475fy4vq1r6xngtjb15",
+    "Caller": "18762970329",
+    "Summary": "\"The user contacted the Hurricane Melissa emergency response line. They are located in Catherine Parish",
+    "Raw Transcript": "Angels community",
+    "Latitude": "and confirmed they are not trapped or injured. Their primary need is food. The agent recorded the information",
+    "Longitude": "noted the food request"
+  },
+  {
+    "Timestamp": "2026-03-15T14:03:52.080Z",
+    "Parish": "St. Catherine",
+    "Community": "Angels",
+    "Needs": "\"[\"\"food\"\"]\"",
+    "CutOff": "FALSE",
+    "Severity": "low",
+    "CallID": "conv_7401kkrww475fy4vq1r6xngtjb15",
+    "Caller": "18762970329",
+    "Summary": "\"The user contacted the Hurricane Melissa emergency response line. They are located in Catherine Parish",
+    "Raw Transcript": "Angels community",
+    "Latitude": "and confirmed they are not trapped or injured. Their primary need is food. The agent recorded the information",
+    "Longitude": "noted the food request"
   },
   {
     "Timestamp": "2026-03-15T14:03:52.080Z",
