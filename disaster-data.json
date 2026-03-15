@@ -292,5 +292,19 @@
     "Raw Transcript": "located in Bulbe",
     "Latitude": "Saint Andrew",
     "Longitude": "reported being cut off from roads and in urgent need of water. The user also stated that everyone was injured. The agent confirmed that this information was recorded"
+  },
+  {
+    "Timestamp": "2026-03-15T22:49:42.706Z",
+    "Parish": "",
+    "Community": "",
+    "Needs": "[]",
+    "CutOff": "FALSE",
+    "Severity": "low",
+    "CallID": "conv_3801kksv1basewevjznhpg46f5c7",
+    "Caller": "18768243247",
+    "Summary": "",
+    "Raw Transcript": "\"[\"\"Wow.\"\"]\"",
+    "Latitude": "",
+    "Longitude": ""
   }
 ]
