@@ -177,28 +177,46 @@ fetch(csvUrl)
     data.forEach(row => {
         const parish = row.Parish?.trim();
         const community = row.Community?.trim();
-        let priority = row.Severity?.trim().toLowerCase();
+        const rawPriority = row.Severity?.trim() || '';
         const rawNeeds = row.Needs?.trim() || '';
         
-        // Map priority values
-        if(priority === 'urgent' || priority === 'critical') priority = 'high';
-        else if(priority === 'moderate') priority = 'medium';
-        else if(priority === 'none' || priority === 'low' || priority === '') priority = 'low';
+        // ===== FIXED PRIORITY MAPPING =====
+        let priority = rawPriority.toLowerCase();
         
-        // Parse needs - remove brackets and quotes
+        // Map all possible values to high/medium/low
+        if(priority.includes('urgent') || priority.includes('critical') || priority.includes('high')) {
+            priority = 'high';
+        }
+        else if(priority.includes('moderate') || priority.includes('medium')) {
+            priority = 'medium';
+        }
+        else if(priority.includes('none') || priority.includes('low') || priority === '' || priority.includes('medical')) {
+            priority = 'low';
+        }
+        else {
+            priority = 'low'; // Default for any other values
+        }
+        
+        // ===== FIXED NEEDS PARSING =====
         let needs = [];
+        
+        // Handle JSON-like arrays with brackets and quotes
         if(rawNeeds.includes('[')) {
+            // Extract content between brackets
             const match = rawNeeds.match(/\[(.*?)\]/);
             if(match) {
                 needs = match[1]
-                    .replace(/["""]/g, '')
+                    .replace(/["""]/g, '') // Remove quotes
                     .split(',')
                     .map(n => n.trim())
                     .filter(n => n.length > 0);
             }
         } else {
-            needs = rawNeeds.split(',').map(n => n.trim());
+            needs = rawNeeds.split(',').map(n => n.trim()).filter(n => n.length > 0);
         }
+        
+        // Clean up needs - sometimes they come as "food" etc with quotes
+        needs = needs.map(n => n.replace(/["""]/g, '').trim());
         
         if(!parish || !community || !priority) return;
 
@@ -239,6 +257,9 @@ fetch(csvUrl)
     });
 
     console.log('Grouped data:', grouped);
+    console.log('High parishes:', Object.keys(grouped.high));
+    console.log('Medium parishes:', Object.keys(grouped.medium));
+    console.log('Low parishes:', Object.keys(grouped.low));
 
     // Clear and update grids
     document.querySelectorAll('.parish-grid').forEach(g => g.innerHTML = '');
@@ -260,17 +281,25 @@ fetch(csvUrl)
         low:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png'
     };
 
-    // Default coordinates for known communities
+    // EXPANDED coordinates for all communities
     const coordsMap = {
         'Angels': [18.0167, -76.9167],
         'August Town': [18.0, -76.75],
-        'Ludo Town': [18.3, -76.9],
-        'Breadbasket': [17.9, -77.3],
-        'Laboubaux': [18.3, -77.2],
-        'Labubu Town': [18.3, -76.9],
-        'Montego Bay': [18.4667, -77.9167],
-        'La Bubu Town': [18.3, -76.9],
-        'Johnstone': [18.2, -77.1]
+        'Ludo Town': [18.3093, -76.8895],
+        'Breadbasket': [17.9557, -77.2405],
+        'Laboubaux': [18.3093, -76.8895],
+        'Labubu Town': [18.3093, -76.8895],
+        'Montego Bay': [18.4762, -77.8939],
+        'La Bubu Town': [18.3093, -76.8895],
+        'Johnstone': [18.2, -77.1],
+        'Trench Town': [18.4762, -77.8939],
+        'Denham Town': [18.4762, -77.8830],
+        'Half Way Tree': [18.0126, -76.7567],
+        'Papine': [18.0200, -76.7500],
+        'May Pen': [17.9557, -77.2405],
+        'Mandeville': [18.0515, -77.5071],
+        'Port Maria': [18.3093, -76.8895],
+        'Port Antonio': [18.1765, -76.4500]
     };
 
     ['high','medium','low'].forEach(priority => {
