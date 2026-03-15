@@ -250,5 +250,47 @@
     "Raw Transcript": "reporting their location as Monroe Road",
     "Latitude": "Kingston. They confirmed they were not trapped or injured but required shelter. The agent recorded this information",
     "Longitude": "notified emergency services for the specified area"
+  },
+  {
+    "Timestamp": "2026-03-15T20:11:46.217Z",
+    "Parish": "St. Andrew",
+    "Community": "August Town",
+    "Needs": "\"[\"\"shelter\"\"",
+    "CutOff": "\"\"injuries\"\"]\"",
+    "Severity": "FALSE",
+    "CallID": "low",
+    "Caller": "conv_0001kksh71cyebzvyf4adhgp687s",
+    "Summary": "18769902475",
+    "Raw Transcript": "\"The conversation details an emergency call during Hurricane Melissa. The user",
+    "Latitude": "located in August Town",
+    "Longitude": "Kingston"
+  },
+  {
+    "Timestamp": "2026-03-15T20:52:34.203Z",
+    "Parish": "St. Andrew",
+    "Community": "August Town",
+    "Needs": "\"[\"\"shelter\"\"]\"",
+    "CutOff": "FALSE",
+    "Severity": "low",
+    "CallID": "conv_0001kksh71cyebzvyf4adhgp687s",
+    "Caller": "18769902475",
+    "Summary": "\"The conversation details an emergency call during Hurricane Melissa. The user",
+    "Raw Transcript": "located in August Town",
+    "Latitude": "Kingston",
+    "Longitude": "reported needing shelter and indicated there were injuries. The agent confirmed the location"
+  },
+  {
+    "Timestamp": "2026-03-15T21:00:33.601Z",
+    "Parish": "St. Andrew",
+    "Community": "Bull bay",
+    "Needs": "\"[\"\"water\"\"]\"",
+    "CutOff": "TRUE",
+    "Severity": "low",
+    "CallID": "conv_9201kksmq1hqe1qr4p0jk2xpz4jp",
+    "Caller": "18769902475",
+    "Summary": "\"The conversation is an emergency response call following Hurricane Melissa. The user",
+    "Raw Transcript": "located in Bulbe",
+    "Latitude": "Saint Andrew",
+    "Longitude": "reported being cut off from roads and in urgent need of water. The user also stated that everyone was injured. The agent confirmed that this information was recorded"
   }
 ]
