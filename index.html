@@ -302,6 +302,35 @@ fetch(csvUrl)
 
 })
 .catch(err => console.error('Error loading CSV:', err));
+    var markerLayer = L.layerGroup().addTo(map);
+
+function loadMarkers(){
+
+    markerLayer.clearLayers();
+
+    highPriorityCommunities.forEach(function(comm){
+        L.marker(comm.coords,{icon:redIcon})
+        .addTo(markerLayer)
+        .bindPopup("<b>"+comm.name+"</b><br>High Priority Area");
+    });
+
+    mediumPriorityCommunities.forEach(function(comm){
+        L.marker(comm.coords,{icon:orangeIcon})
+        .addTo(markerLayer)
+        .bindPopup("<b>"+comm.name+"</b><br>Medium Priority Area");
+    });
+
+    lowPriorityCommunities.forEach(function(comm){
+        L.marker(comm.coords,{icon:blueIcon})
+        .addTo(markerLayer)
+        .bindPopup("<b>"+comm.name+"</b><br>Low Priority Area");
+    });
+
+}
+
+loadMarkers();
+
+setInterval(loadMarkers, 5000);
 </script>
 </body>
 </html>
