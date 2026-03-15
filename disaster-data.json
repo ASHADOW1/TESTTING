@@ -194,5 +194,19 @@
     "Raw Transcript": "Paul",
     "Latitude": "contacted the Hurricane Melissa emergency response line. The agent confirmed Paul's location as Saint Mary",
     "Longitude": "Richmond"
+  },
+  {
+    "Timestamp": "2026-03-15T18:00:40.555Z",
+    "Parish": "Kingston",
+    "Community": "Monroe Road",
+    "Needs": "\"[\"\"Shelter\"\"]\"",
+    "CutOff": "FALSE",
+    "Severity": "",
+    "CallID": "conv_8501kksaecage5a9fbzb3vqm7v4e",
+    "Caller": "18769902475",
+    "Summary": "\"The user contacted the Hurricane Melissa emergency response line",
+    "Raw Transcript": "reporting their location as Monroe Road",
+    "Latitude": "Kingston. They confirmed they were not trapped or injured but required shelter. The agent recorded this information",
+    "Longitude": "notified emergency services for the specified area"
   }
 ]
