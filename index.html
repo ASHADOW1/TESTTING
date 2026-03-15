@@ -12,58 +12,19 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-<style>
-/* Drop animation for markers */
-@keyframes markerDrop {
-    0% {
-        opacity: 0;
-        transform: translateY(-100px) scale(0.5);
-    }
-    60% {
-        opacity: 1;
-        transform: translateY(10px) scale(1.1);
-    }
-    80% {
-        transform: translateY(-5px) scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.drop-animation {
-    animation: markerDrop 0.6s ease-out forwards;
-}
-
-/* Pulse animation for count bubbles */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.2);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-.pulse-animation {
-    animation: pulse 0.5s ease-in-out;
-}
-</style>
 </head>
+<body>
 <body>
 
 <div class="container">
     <header class="header">
         <h1 id="titlesize">Disaster Response Dashboard</h1>
-       <p id="description"><strong>Disaster Relay</strong> is a live public dashboard that shows the current situation across communities following <strong>Hurricane Melissa</strong>. Each update on the dashboard comes from real calls and reports that have been converted into structured data. Communities are grouped by <b>priority level</b> so viewers can quickly see where help is most urgently needed. By clicking on a community, users can view reported needs such as <b>food, water, or shelter</b>, as well as whether <b>injuries have been reported</b>. This allows the public and responders to clearly understand which areas are most affected and what support those communities require.
-</p>
-<div id = "map"></div>
-</header>
+        <p id="description">
+            <strong>Disaster Relay</strong> is a live public dashboard that shows the current situation across communities following <strong>Hurricane Melissa</strong>. Each update on the dashboard comes from real calls and reports that have been converted into structured data. Communities are grouped by <b>priority level</b> so viewers can quickly see where help is most urgently needed. By clicking on a community, users can view reported needs such as <b>food, water, or shelter</b>, as well as whether <b>injuries have been reported</b>. This allows the public and responders to clearly understand which areas are most affected and what support those communities require.
+        </p>
+        <p id="update-status">Last updated: <span id="time-display">Fetching...</span></p>
+        <div id="map"></div>
+    </header>
 
     <section class="priority high">
         <h2>High Priority</h2>
@@ -98,10 +59,13 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'&copy; OpenStreetMap contributors'
 }).addTo(map);
 
+// Use a LayerGroup to manage markers so we can clear them during refresh
+var markerLayer = L.layerGroup().addTo(map);
+
 // ====== Function to create markers with DROP ANIMATION ======
 function addCountMarkerWithIcon(communities, color, priorityText, iconUrl){
     communities.forEach(function(comm){
-        // Count bubble marker (with pulse animation)
+        // Count bubble marker
         var countMarkerIcon = L.divIcon({
             html: '<div style="background:'+color+'; color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; border:2px solid white;" class="pulse-animation">'+comm.count+'</div>',
             className:'',
@@ -110,9 +74,8 @@ function addCountMarkerWithIcon(communities, color, priorityText, iconUrl){
             popupAnchor:[0,-15]
         });
 
-        var countMarker = L.marker([comm.coords[0], comm.coords[1]], {icon: countMarkerIcon}).addTo(map);
+        var countMarker = L.marker([comm.coords[0], comm.coords[1]], {icon: countMarkerIcon}).addTo(markerLayer);
         
-        // Add drop animation to count marker
         countMarker.on('add', function() {
             setTimeout(() => {
                 if (countMarker.getElement()) {
@@ -132,10 +95,9 @@ function addCountMarkerWithIcon(communities, color, priorityText, iconUrl){
         });
 
         var marker = L.marker([comm.coords[0], comm.coords[1]], {icon: standardIcon})
-         .addTo(map)
+         .addTo(markerLayer)
          .bindPopup("<b>"+comm.name+"</b><br>"+priorityText+(comm.count>1?" (x"+comm.count+")":""));
         
-        // Add drop animation to pin marker
         marker.on('add', function() {
             setTimeout(() => {
                 if (marker.getElement()) {
@@ -198,110 +160,128 @@ function createParishCard(parishName, communities) {
 // ====== Load and Process CSV Data ======
 const csvUrl = 'https://docs.google.com/spreadsheets/d/13WUAN1zNK3fH_wX32QLb44EnQNiA5Z0_jwTtYA_2XHA/export?format=csv&gid=0';
 
-fetch(csvUrl)
-.then(response => response.text())
-.then(csvText => {
-    const lines = csvText.split(/\r?\n/);
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^\uFEFF/, ''));
-    const data = [];
-    
-    for(let i = 1; i < lines.length; i++) {
-        if(!lines[i].trim()) continue;
-        const values = lines[i].split(',').map(v => v.trim());
-        const row = {};
-        headers.forEach((h, idx) => { row[h] = values[idx] || ''; });
-        data.push(row);
-    }
-    
-    const communities = {};
+function loadDashboardData() {
+    // Cache busting timestamp
+    const fetchUrl = `${csvUrl}&t=${new Date().getTime()}`;
 
-    data.forEach(row => {
-        const parish = row.Parish?.trim();
-        const community = row.Community?.trim();
-        const rawPriority = (row.Severity || row.Priority || "").toLowerCase().trim();
-        const rawNeeds = row.Needs?.trim() || '';
+    fetch(fetchUrl)
+    .then(response => response.text())
+    .then(csvText => {
+        const lines = csvText.split(/\r?\n/);
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^\uFEFF/, ''));
+        const data = [];
         
-        if(!parish || !community) return;
-
-        let priority = 'low';
-        if (rawPriority.includes('urgent') || rawPriority.includes('critical') || rawPriority.includes('high')) {
-            priority = 'high';
-        } else if (rawPriority.includes('moderate') || rawPriority.includes('medium') || rawPriority.includes('med')) {
-            priority = 'medium';
+        for(let i = 1; i < lines.length; i++) {
+            if(!lines[i].trim()) continue;
+            const values = lines[i].split(',').map(v => v.trim());
+            const row = {};
+            headers.forEach((h, idx) => { row[h] = values[idx] || ''; });
+            data.push(row);
         }
+        
+        const communities = {};
 
-        let needs = [];
-        if (rawNeeds) {
-            needs = rawNeeds.replace(/[\[\]"]/g, '').split(',').map(n => n.trim()).filter(n => n.length > 0);
-        }
+        data.forEach(row => {
+            const parish = row.Parish?.trim();
+            const community = row.Community?.trim();
+            const rawPriority = (row.Severity || row.Priority || "").toLowerCase().trim();
+            const rawNeeds = row.Needs?.trim() || '';
+            
+            if(!parish || !community) return;
 
-        const key = `${parish}|${community}`;
-        if(!communities[key]) {
-            communities[key] = { parish, community, priority, needs, count: 1 };
-        } else {
-            const prioRank = {high:3, medium:2, low:1};
-            if(prioRank[priority] > prioRank[communities[key].priority]) {
-                communities[key].priority = priority;
+            let priority = 'low';
+            if (rawPriority.includes('urgent') || rawPriority.includes('critical') || rawPriority.includes('high')) {
+                priority = 'high';
+            } else if (rawPriority.includes('moderate') || rawPriority.includes('medium') || rawPriority.includes('med')) {
+                priority = 'medium';
             }
-            needs.forEach(n => {
-                if(!communities[key].needs.includes(n)) communities[key].needs.push(n);
-            });
-            communities[key].count++;
-        }
+
+            let needs = [];
+            if (rawNeeds) {
+                needs = rawNeeds.replace(/[\[\]"]/g, '').split(',').map(n => n.trim()).filter(n => n.length > 0);
+            }
+
+            const key = `${parish}|${community}`;
+            if(!communities[key]) {
+                communities[key] = { parish, community, priority, needs, count: 1 };
+            } else {
+                const prioRank = {high:3, medium:2, low:1};
+                if(prioRank[priority] > prioRank[communities[key].priority]) {
+                    communities[key].priority = priority;
+                }
+                needs.forEach(n => {
+                    if(!communities[key].needs.includes(n)) communities[key].needs.push(n);
+                });
+                communities[key].count++;
+            }
+        });
+
+        const commArray = Object.values(communities);
+        const grouped = { high: {}, medium: {}, low: {} };
+
+        commArray.forEach(item => {
+            if (!grouped[item.priority][item.parish]) grouped[item.priority][item.parish] = [];
+            grouped[item.priority][item.parish].push(item);
+        });
+
+        // Clear existing markers before redraw
+        markerLayer.clearLayers();
+
+        // Update UI Grids
+        ['high', 'medium', 'low'].forEach(prio => {
+            const grid = document.querySelector(`.priority.${prio} .parish-grid`);
+            if (grid) {
+                grid.innerHTML = '';
+                const parishes = Object.keys(grouped[prio]).sort();
+                parishes.forEach(parish => {
+                    grid.appendChild(createParishCard(parish, grouped[prio][parish]));
+                });
+            }
+        });
+
+        // ====== Map markers ======
+        const colors = {high:'red', medium:'orange', low:'blue'};
+        const icons = {
+            high:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+            medium:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
+            low:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png'
+        };
+
+        const coordsMap = {
+            'Angels': [18.0167, -76.9167],
+            'August Town': [18.0, -76.75],
+            'Ludo Town': [18.3093, -76.8895],
+            'Breadbasket': [17.9557, -77.2405],
+            'Montego Bay': [18.4762, -77.8939],
+            'La Bubu Town': [18.3093, -76.8895],
+            'Johnstone': [18.2, -77.1],
+            'Oriott': [18.25, -77.35],
+            'Yekkiw': [18.32, -77.42]
+        };
+
+        const baseCoords = [18.1096, -77.2975];
+        commArray.forEach((c, i) => {
+            const coords = coordsMap[c.community] || [baseCoords[0] + 0.01*i, baseCoords[1] + 0.01*i];
+            addCountMarkerWithIcon([{
+                name: c.community,
+                coords: coords,
+                count: c.count
+            }], colors[c.priority], c.priority.charAt(0).toUpperCase() + c.priority.slice(1) + ' Priority', icons[c.priority]);
+        });
+
+        document.getElementById('time-display').innerText = new Date().toLocaleTimeString();
+    })
+    .catch(err => {
+        console.error('Error loading CSV:', err);
+        document.getElementById('time-display').innerText = 'Error fetching data';
     });
+}
 
-    const commArray = Object.values(communities);
-    const grouped = { high: {}, medium: {}, low: {} };
+// Initial Load
+loadDashboardData();
 
-    commArray.forEach(item => {
-        if (!grouped[item.priority][item.parish]) grouped[item.priority][item.parish] = [];
-        grouped[item.priority][item.parish].push(item);
-    });
-
-    // Update UI Grids
-    ['high', 'medium', 'low'].forEach(prio => {
-        const grid = document.querySelector(`.priority.${prio} .parish-grid`);
-        if (grid) {
-            grid.innerHTML = '';
-            const parishes = Object.keys(grouped[prio]).sort();
-            parishes.forEach(parish => {
-                grid.appendChild(createParishCard(parish, grouped[prio][parish]));
-            });
-        }
-    });
-
-    // ====== Map markers with DROP ANIMATION ======
-    const colors = {high:'red', medium:'orange', low:'blue'};
-    const icons = {
-        high:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-        medium:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
-        low:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png'
-    };
-
-    const coordsMap = {
-        'Angels': [18.0167, -76.9167],
-        'August Town': [18.0, -76.75],
-        'Ludo Town': [18.3093, -76.8895],
-        'Breadbasket': [17.9557, -77.2405],
-        'Montego Bay': [18.4762, -77.8939],
-        'La Bubu Town': [18.3093, -76.8895],
-        'Johnstone': [18.2, -77.1],
-        'Oriott': [18.25, -77.35],
-        'Yekkiw': [18.32, -77.42]
-    };
-
-    const baseCoords = [18.1096, -77.2975]; // fallback
-    commArray.forEach((c, i) => {
-        const coords = coordsMap[c.community] || [baseCoords[0] + 0.01*i, baseCoords[1] + 0.01*i];
-        addCountMarkerWithIcon([{
-            name: c.community,
-            coords: coords,
-            count: c.count
-        }], colors[c.priority], c.priority.charAt(0).toUpperCase() + c.priority.slice(1) + ' Priority', icons[c.priority]);
-    });
-
-})
-.catch(err => console.error('Error loading CSV:', err));
+// Refresh every 10 seconds
+setInterval(loadDashboardData, 10000);
 </script>
 </body>
 </html>
