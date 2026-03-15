@@ -9,7 +9,9 @@
     "CallID": "TRUE",
     "Caller": "critical",
     "Summary": "conv_0501kkmv68zyefgrgz3pmthc2r3p",
-    "Raw Transcript": "18765340329"
+    "Raw Transcript": "18765340329",
+    "Latitude": "\"The user contacted the Hurricane Melissa emergency response line",
+    "Longitude": "reporting their location as St. Catherine"
   },
   {
     "Timestamp": "2026-03-14T02:39:33.737Z",
@@ -21,7 +23,9 @@
     "CallID": "TRUE",
     "Caller": "critical",
     "Summary": "conv_0501kkmv68zyefgrgz3pmthc2r3p",
-    "Raw Transcript": "18765340329"
+    "Raw Transcript": "18765340329",
+    "Latitude": "\"The user contacted the Hurricane Melissa emergency response line",
+    "Longitude": "reporting their location as St. Catherine"
   },
   {
     "Timestamp": "1773520575",
@@ -33,7 +37,9 @@
     "CallID": "conv_9501kkq0z1v2e09bxh8d1dnprx0n",
     "Caller": "18762970329",
     "Summary": "\"The user contacted the Hurricane Melissa emergency response line. The agent attempted to gather the user's location",
-    "Raw Transcript": "specifically their parish and community. However"
+    "Raw Transcript": "specifically their parish and community. However",
+    "Latitude": "the user's responses were largely incoherent and did not directly answer the agent's questions",
+    "Longitude": "making it difficult for the agent to proceed with assistance. The agent remained patient"
   },
   {
     "Timestamp": "{{ $json.timestamp }}",
@@ -45,43 +51,9 @@
     "CallID": "conv_1201kkqwesenewd8rf3hnyv1tb4z",
     "Caller": "18765340329",
     "Summary": "{{ $json.summary }}",
-    "Raw Transcript": "[]"
-  },
-  {
-    "Timestamp": "2026-03-15T06:08:21.880Z",
-    "Parish": "St. Mary",
-    "Community": "Ludo Town",
-    "Needs": "\"[\"\"shelter\"\"]\"",
-    "CutOff": "TRUE",
-    "Severity": "urgent",
-    "CallID": "conv_1201kkqwesenewd8rf3hnyv1tb4z",
-    "Caller": "18765340329",
-    "Summary": "\"The user contacted the Hurricane Melissa emergency response line. They identified their location as Ludo Town",
-    "Raw Transcript": "Saint Mary"
-  },
-  {
-    "Timestamp": "2026-03-15T06:12:12.217Z",
-    "Parish": "St. Mary",
-    "Community": "Ludo Town",
-    "Needs": "\"[\"\"shelter\"\"]\"",
-    "CutOff": "TRUE",
-    "Severity": "urgent",
-    "CallID": "conv_1201kkqwesenewd8rf3hnyv1tb4z",
-    "Caller": "18765340329",
-    "Summary": "\"The user contacted the Hurricane Melissa emergency response line. They identified their location as Ludo Town",
-    "Raw Transcript": "Saint Mary"
-  },
-  {
-    "Timestamp": "2026-03-15T06:15:26.777Z",
-    "Parish": "Clarendon",
-    "Community": "Breadbasket",
-    "Needs": "\"[\"\"Water\"\"]\"",
-    "CutOff": "TRUE",
-    "Severity": "Urgent",
-    "CallID": "conv_2101kkr22848ewz89kche3ngzf0b",
-    "Caller": "18765340329",
-    "Summary": "\"The user contacted the Hurricane Melissa emergency response line",
-    "Raw Transcript": "reporting their location as Breadbasket"
+    "Raw Transcript": "[]",
+    "Latitude": "",
+    "Longitude": ""
   },
   {
     "Timestamp": "2026-03-15T06:21:46.247Z",
@@ -93,7 +65,9 @@
     "CallID": "conv_2001kkr2es5vf708bjw92txqsa4m",
     "Caller": "18765340329",
     "Summary": "\"The conversation is an emergency response call for Hurricane Melissa. The user",
-    "Raw Transcript": "located in Laboubaux town"
+    "Raw Transcript": "located in Laboubaux town",
+    "Latitude": "Saint Anne",
+    "Longitude": "confirmed they are not trapped or injured and primarily needs water. The agent recorded the information"
   },
   {
     "Timestamp": "2026-03-15T06:25:53.268Z",
@@ -105,7 +79,9 @@
     "CallID": "conv_2901kkr2q7zafb2shrs1rhpac6se",
     "Caller": "18765340329",
     "Summary": "\"The conversation is an interaction with the Hurricane Melissa emergency response line. The agent gathered initial information from the user",
-    "Raw Transcript": "who confirmed they are in Labubu Town"
+    "Raw Transcript": "who confirmed they are in Labubu Town",
+    "Latitude": "St. Mary",
+    "Longitude": "are not trapped"
   },
   {
     "Timestamp": "2026-03-15T07:50:41.992Z",
@@ -117,31 +93,9 @@
     "CallID": "conv_1201kkr7g1rfe158945t2e6pawrg",
     "Caller": "18768360669",
     "Summary": "\"The conversation is an emergency response call for Hurricane Melissa. The user",
-    "Raw Transcript": "located in Montego Bay"
-  },
-  {
-    "Timestamp": "2026-03-15T08:17:55.006Z",
-    "Parish": "St. Mary",
-    "Community": "La Bubu town",
-    "Needs": "\"[\"\"Water\"\"]\"",
-    "CutOff": "FALSE",
-    "Severity": "None",
-    "CallID": "conv_0601kkr93c1nfbsbry2geq0xfegx",
-    "Caller": "18769902475",
-    "Summary": "\"The conversation involved a user contacting the Hurricane Melissa emergency response line. The agent gathered essential information",
-    "Raw Transcript": "confirming the user's location as Saint Mary"
-  },
-  {
-    "Timestamp": "2026-03-15T10:44:16.854Z",
-    "Parish": "St. Ann",
-    "Community": "Johnstone",
-    "Needs": "\"[\"\"Food\"\"",
-    "CutOff": "\"\"Water\"\"",
-    "Severity": "\"\"Medical Assistance\"\"]\"",
-    "CallID": "TRUE",
-    "Caller": "Urgent",
-    "Summary": "conv_9801kkrhf3c3e3mbx4gsd2jaz36x",
-    "Raw Transcript": "18762970329"
+    "Raw Transcript": "located in Montego Bay",
+    "Latitude": "St. James",
+    "Longitude": "Jamaica"
   },
   {
     "Timestamp": "2026-03-15T11:24:38.301Z",
@@ -153,7 +107,9 @@
     "CallID": "conv_5901kkrkrmtnf8hvbnkaav8ncjxz",
     "Caller": "18769902475",
     "Summary": "\"The conversation is an emergency response call for Hurricane Melissa. The agent gathered information from the user",
-    "Raw Transcript": "who is located in Rabobu Town"
+    "Raw Transcript": "who is located in Rabobu Town",
+    "Latitude": "Saint Mary. The user confirmed they are not trapped or injured but require water. The agent recorded the information",
+    "Longitude": "notified emergency services for the specified area"
   },
   {
     "Timestamp": "2026-03-15T11:38:36.400Z",
@@ -165,6 +121,8 @@
     "CallID": "conv_4201kkrmjcywejg9yfehe3bm53nt",
     "Caller": "18762970329",
     "Summary": "\"The user",
-    "Raw Transcript": "Paul"
+    "Raw Transcript": "Paul",
+    "Latitude": "contacted the Hurricane Melissa emergency response line. The agent confirmed Paul's location as Saint Mary",
+    "Longitude": "Richmond"
   }
 ]
