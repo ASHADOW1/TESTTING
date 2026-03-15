@@ -19,7 +19,7 @@
     <header class="header">
         <h1 id="titlesize">Disaster Response Dashboard</h1>
         <p id="description"><strong>Disaster Relay</strong> is a live public dashboard that shows the current situation across communities following <strong>Hurricane Melissa</strong>.</p>
-        <div id="map"></div>
+        <div id="map" style="height:500px;"></div>
     </header>
 
     <section class="priority high">
@@ -138,7 +138,6 @@ const csvUrl = 'https://docs.google.com/spreadsheets/d/13WUAN1zNK3fH_wX32QLb44En
 fetch(csvUrl)
 .then(response => response.text())
 .then(csvText => {
-    // Parse CSV and handle BOM/hidden characters
     const lines = csvText.split(/\r?\n/);
     const headers = lines[0].split(',').map(h => h.trim().replace(/^\uFEFF/, ''));
     const data = [];
@@ -161,7 +160,6 @@ fetch(csvUrl)
         
         if(!parish || !community) return;
 
-        // Enhanced Priority Mapping
         let priority = 'low';
         if (rawPriority.includes('urgent') || rawPriority.includes('critical') || rawPriority.includes('high')) {
             priority = 'high';
@@ -169,7 +167,6 @@ fetch(csvUrl)
             priority = 'medium';
         }
 
-        // Parse needs
         let needs = [];
         if (rawNeeds) {
             needs = rawNeeds.replace(/[\[\]"]/g, '').split(',').map(n => n.trim()).filter(n => n.length > 0);
@@ -210,7 +207,7 @@ fetch(csvUrl)
         }
     });
 
-    // Add map markers
+    // ====== Map markers ======
     const colors = {high:'red', medium:'orange', low:'blue'};
     const icons = {
         high:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -225,17 +222,21 @@ fetch(csvUrl)
         'Breadbasket': [17.9557, -77.2405],
         'Montego Bay': [18.4762, -77.8939],
         'La Bubu Town': [18.3093, -76.8895],
-        'Johnstone': [18.2, -77.1]
+        'Johnstone': [18.2, -77.1],
+        'Oriott': [18.25, -77.35],
+        'Yekkiw': [18.32, -77.42]
     };
 
-    commArray.forEach(c => {
-        const coords = coordsMap[c.community] || [18.1096, -77.2975];
+    const baseCoords = [18.1096, -77.2975]; // fallback
+    commArray.forEach((c, i) => {
+        const coords = coordsMap[c.community] || [baseCoords[0] + 0.01*i, baseCoords[1] + 0.01*i];
         addCountMarkerWithIcon([{
             name: c.community,
             coords: coords,
             count: c.count
         }], colors[c.priority], c.priority.charAt(0).toUpperCase() + c.priority.slice(1) + ' Priority', icons[c.priority]);
     });
+
 })
 .catch(err => console.error('Error loading CSV:', err));
 </script>
