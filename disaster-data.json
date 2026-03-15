@@ -96,19 +96,5 @@
     "Raw Transcript": "Angels community",
     "Latitude": "and confirmed they are not trapped or injured. Their primary need is food. The agent recorded the information",
     "Longitude": "noted the food request"
-  },
-  {
-    "Timestamp": "2026-03-15T14:07:05.096Z",
-    "Parish": "St. Ann",
-    "Community": "Brown's Town",
-    "Needs": "\"[\"\"water\"\"]\"",
-    "CutOff": "FALSE",
-    "Severity": "moderate",
-    "CallID": "conv_5901kkrx2h0deh8azjs812k71d6z",
-    "Caller": "18769902475",
-    "Summary": "\"The user contacted the Hurricane Melissa emergency response line. The agent gathered essential information",
-    "Raw Transcript": "including the user's location (Saint Anne",
-    "Latitude": "Brownstown)",
-    "Longitude": "confirmation that they were not trapped"
   }
 ]
